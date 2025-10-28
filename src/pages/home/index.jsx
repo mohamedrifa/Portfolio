@@ -139,7 +139,7 @@ export const Home = () => {
               <Link to="/portfolio" className="btn btn--accent" aria-label="View my portfolio">
                 My Portfolio
               </Link>
-              <Link to="/contact" className="btn btn--ghost btn--alt" aria-label="Contact me">
+              <Link to="/contact" className="btn btn--ghost btn--alt" style={{color: "var(--h3-text)"}} aria-label="Contact me">
                 Contact Me
               </Link>
             </div>

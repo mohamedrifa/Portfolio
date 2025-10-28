@@ -106,7 +106,7 @@ body {
   border-radius: 12px;
   border: 1px solid color-mix(in lab, var(--accent) 35%, transparent);
   background: linear-gradient(180deg, color-mix(in lab, var(--accent) 12%, var(--surface)), var(--surface));
-  color: var(--h3-text);
+  color: var(--text);
   font-weight: 600;
   text-decoration: none;
   box-shadow: var(--shadow);
