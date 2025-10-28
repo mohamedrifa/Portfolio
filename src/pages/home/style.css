@@ -67,7 +67,7 @@ body {
 }
 
 .hero__tagline {
-  color: var(--muted);
+  color: var(--h3-text);
   font-size: clamp(1rem, 1.3vw, 1.1rem);
   max-width: 60ch;
   margin: 10px 0 22px;
