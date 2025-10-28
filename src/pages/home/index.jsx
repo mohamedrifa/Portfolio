@@ -5,6 +5,7 @@ import Typewriter from "typewriter-effect";
 import { Link } from "react-router-dom";
 import { db } from "../../config/firebase";
 import { ref, get, child } from "firebase/database";
+import { lightImage, darkImage } from "../../utils/homeImage";
 
 const CACHE_KEY = "rifayath_data";
 
@@ -19,6 +20,7 @@ export const Home = () => {
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
     const cached = localStorage.getItem(CACHE_KEY);
@@ -42,6 +44,25 @@ export const Home = () => {
       })
       .catch((err) => console.error("❌ Firebase fetch error:", err))
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      const bg = getComputedStyle(document.documentElement)
+        .getPropertyValue("--bg-color")
+        .trim();
+      setIsDark(bg === "#0c0c0c");
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["style", "class"],
+      subtree: true,
+    });
+    const bg = getComputedStyle(document.documentElement)
+      .getPropertyValue("--bg-color")
+      .trim();
+    setIsDark(bg === "#0c0c0c");
+    return () => observer.disconnect();
   }, []);
 
   if (loading && !data) {
@@ -74,14 +95,14 @@ export const Home = () => {
 
         <div className="hero container">
           {/* Media panel */}
-          <div
-            className="hero__media"
-            style={{
-              backgroundImage: `url(${data.profileImg || "https://images.unsplash.com/photo-1514790193030-c89d266d5a9d"})`,
-            }}
-            role="img"
-            aria-label={data.name}
-          />
+        <div
+          className="hero__media"
+          style={{
+            backgroundImage: `url(${isDark ? darkImage : lightImage})`,
+          }}
+          role="img"
+          aria-label={data.name}
+        />
 
           {/* Text column */}
           <div className="hero__content">

@@ -8,6 +8,7 @@
     --text-color-3: rgb(204, 0, 0);
     --hover-glow: #FFFFFF;
     --overlay-color: rgb(12 12 12 / 63%);
+    
 }
 
 [data-theme="light"] {

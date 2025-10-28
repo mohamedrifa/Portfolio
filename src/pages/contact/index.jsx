@@ -1,12 +1,13 @@
-import React, { useState } from "react";
-import * as emailjs from "emailjs-com";
+import React, { useState, useEffect } from "react";
 import "./style.css";
 import { Helmet, HelmetProvider } from "react-helmet-async";
-import { meta } from "../../content_option";
 import { Container, Row, Col, Alert } from "react-bootstrap";
-import { contactConfig } from "../../content_option";
+import { db } from "../../config/firebase";
+import { ref, get, child } from "firebase/database";
 
-export const ContactUs = () => {
+const CACHE_KEY = "rifayath_data";
+
+export const ContactMe = () => {
   const [formData, setFormdata] = useState({
     email: "",
     name: "",
@@ -16,45 +17,41 @@ export const ContactUs = () => {
     alertmessage: "",
     variant: "",
   });
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      try {
+        setData(JSON.parse(cached));
+      } catch {
+        console.warn("Invalid cached data, ignoring...");
+      }
+    }
+    setLoading(true);
+    get(child(ref(db), "users/fNbNlQ9o3sef4cst0CTVsaqOiym2"))
+      .then((snap) => {
+        if (snap.exists()) {
+          const freshData = snap.val();
+          setData(freshData);
+          localStorage.setItem(CACHE_KEY, JSON.stringify(freshData));
+        } else {
+          console.warn("⚠️ No data found at", "users/fNbNlQ9o3sef4cst0CTVsaqOiym2");
+        }
+      })
+      .catch((err) => console.error("❌ Firebase fetch error:", err))
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setFormdata({ loading: true });
-
-    const templateParams = {
-      from_name: formData.email,
-      user_name: formData.name,
-      to_name: contactConfig.YOUR_EMAIL,
-      message: formData.message,
-    };
-
-    emailjs
-      .send(
-        contactConfig.YOUR_SERVICE_ID,
-        contactConfig.YOUR_TEMPLATE_ID,
-        templateParams,
-        contactConfig.YOUR_USER_ID
-      )
-      .then(
-        (result) => {
-          console.log(result.text);
-          setFormdata({
-            loading: false,
-            alertmessage: "SUCCESS! ,Thankyou for your messege",
-            variant: "success",
-            show: true,
-          });
-        },
-        (error) => {
-          console.log(error.text);
-          setFormdata({
-            alertmessage: `Faild to send!,${error.text}`,
-            variant: "danger",
-            show: true,
-          });
-          document.getElementsByClassName("co_alert")[0].scrollIntoView();
-        }
-      );
+    const subject = encodeURIComponent(`Message from ${formData.name}`);
+    const body = encodeURIComponent(
+      `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
+    );
+    const recipient = data?.email;
+    window.location.href = `https://mail.google.com/mail/?view=cm&fs=1&to=${recipient}&su=${subject}&body=${body}`;
   };
 
   const handleChange = (e) => {
@@ -64,13 +61,29 @@ export const ContactUs = () => {
     });
   };
 
+    if (loading && !data) {
+    return (
+      <div className="hero container" style={{ textAlign: "center", padding: "4rem", color: "#666" }}>
+        Loading...
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="hero container" style={{ textAlign: "center", padding: "4rem", color: "#666" }}>
+        No data found.
+      </div>
+    );
+  }
+
   return (
     <HelmetProvider>
       <Container>
         <Helmet>
           <meta charSet="utf-8" />
-          <title>{meta.title} | Contact</title>
-          <meta name="description" content={meta.description} />
+          <title>{data.name} | Contact</title>
+          <meta name="description" content={`I’m ${data.name}, a developer passionate about building cool stuff.`} />
         </Helmet>
         <Row className="mb-5 mt-3 pt-md-3">
           <Col lg="8">
@@ -96,20 +109,23 @@ export const ContactUs = () => {
             <h3 className="color_sec py-4">Get in touch</h3>
             <address>
               <strong>Email:</strong>{" "}
-              <a href={`mailto:${contactConfig.YOUR_EMAIL}`}>
-                {contactConfig.YOUR_EMAIL}
+              <a href={`mailto:${data.email}`}>
+                {data.email}
               </a>
               <br />
               <br />
-              {contactConfig.hasOwnProperty("YOUR_FONE") ? (
-                <p>
-                  <strong>Phone:</strong> {contactConfig.YOUR_FONE}
-                </p>
-              ) : (
-                ""
-              )}
+              <p>
+                <strong>Phone:</strong>{" "}
+                <a href={`tel:${data.phone}`} style={{ color: "inherit", textDecoration: "none" }}>
+                  {data.phone}
+                </a>
+              </p>
             </address>
-            <p>{contactConfig.description}</p>
+            <p className="hero__tagline">
+              {data.summary?.length > 120
+                ? data.summary.slice(0, 120) + "..."
+                : data.summary}
+            </p>
           </Col>
           <Col lg="7" className="d-flex align-items-center">
             <form onSubmit={handleSubmit} className="contact__form w-100">

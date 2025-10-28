@@ -3,7 +3,7 @@ import { Route, Routes} from "react-router-dom";
 import withRouter from "../hooks/withRouter"
 import { Home } from "../pages/home";
 import { Projects } from "../pages/projects";
-import { ContactUs } from "../pages/contact";
+import { ContactMe } from "../pages/contact";
 import { About } from "../pages/about";
 import { Socialicons } from "../components/socialicons";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
@@ -23,7 +23,7 @@ const AnimatedRoutes = withRouter(({ location }) => (
         <Route exact path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/projects" element={<Projects />} />
-        <Route path="/contact" element={<ContactUs />} />
+        <Route path="/contact" element={<ContactMe />} />
         <Route path="*" element={<Home />} />
       </Routes>
     </CSSTransition>
