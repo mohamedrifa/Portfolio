@@ -169,7 +169,7 @@ export const About = () => {
                         padding: "2px 10px",
                         borderRadius: "8px",
                         backgroundColor: "var(--secondary-color)",
-                        color: "#fff",
+                        color: "var(--h3-text)",
                         textDecoration: "none",
                         fontSize: "0.9rem",
                       }}
