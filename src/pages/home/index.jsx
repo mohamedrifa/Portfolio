@@ -21,7 +21,6 @@ export const Home = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // 1️⃣ Try loading from cache first
     const cached = localStorage.getItem(CACHE_KEY);
     if (cached) {
       try {
@@ -30,15 +29,12 @@ export const Home = () => {
         console.warn("Invalid cached data, ignoring...");
       }
     }
-
-    // 2️⃣ Always refresh from Firebase in background
     setLoading(true);
     get(child(ref(db), "users/fNbNlQ9o3sef4cst0CTVsaqOiym2"))
       .then((snap) => {
         if (snap.exists()) {
           const freshData = snap.val();
           setData(freshData);
-          // 3️⃣ Update cache
           localStorage.setItem(CACHE_KEY, JSON.stringify(freshData));
         } else {
           console.warn("⚠️ No data found at", "users/fNbNlQ9o3sef4cst0CTVsaqOiym2");
@@ -72,7 +68,7 @@ export const Home = () => {
           <title>{data.name}</title>
           <meta
             name="description"
-            content={`I’m ${data.name}, a developer and designer passionate about building cool stuff.`}
+            content={`I’m ${data.name}, a developer passionate about building cool stuff.`}
           />
         </Helmet>
 

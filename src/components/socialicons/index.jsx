@@ -12,7 +12,14 @@ import {
   FaTiktok,
   FaCircle
 } from "react-icons/fa";
-import { socialprofils } from "../../content_option";
+
+
+const socialprofils = {
+    instagram: "https://www.instagram.com/mmohamedrifayath/",
+    facebook: "https://www.facebook.com/mohamed.rifayath.39",
+    github: "https://github.com/mohamedrifa",
+    linkedin: "https://www.linkedin.com/in/mohamed-rifayath-57481b22b/",
+};
 
 const ICON_MAPPING = {
   default: FaCircle,
