@@ -31,3 +31,4 @@ setPersistence(auth, browserLocalPersistence).catch(() =>
 );
 
 export { app, auth, db, googleProvider };
+
