@@ -106,7 +106,7 @@ body {
   border-radius: 12px;
   border: 1px solid color-mix(in lab, var(--accent) 35%, transparent);
   background: linear-gradient(180deg, color-mix(in lab, var(--accent) 12%, var(--surface)), var(--surface));
-  color: var(--text);
+  color: var(--h3-text);
   font-weight: 600;
   text-decoration: none;
   box-shadow: var(--shadow);
@@ -123,7 +123,7 @@ body {
 
 .btn--ghost {
   background: transparent;
-  border: 1px solid color-mix(in lab, var(--text) 12%, transparent);
+  border: 1px solid color-mix(in lab, var(--h3-text) 12%, transparent);
   box-shadow: none;
 }
 .btn--accent {
@@ -131,7 +131,7 @@ body {
   border-color: color-mix(in lab, var(--accent) 55%, transparent);
 }
 .btn--alt {
-  border-color: color-mix(in lab, var(--accent-2) 55%, transparent);
+  border-color: color-mix(in lab, var(--h3-text) 55%, transparent);
 }
 
 /* ===== Responsive Design ===== */
