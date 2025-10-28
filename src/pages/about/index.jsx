@@ -1,56 +1,73 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./style.css";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import { Container, Row, Col } from "react-bootstrap";
-import { dataabout, meta, worktimeline, skills, services } from "../../content_option";
+import { db } from "../../config/firebase";
+import { ref, get, child } from "firebase/database";
+
+const CACHE_KEY = "rifayath_data";
 
 export const About = () => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      try {
+        setData(JSON.parse(cached));
+      } catch {
+        console.warn("Invalid cached data, ignoring...");
+      }
+    }
+
+    setLoading(true);
+    get(child(ref(db), "users/fNbNlQ9o3sef4cst0CTVsaqOiym2"))
+      .then((snap) => {
+        if (snap.exists()) {
+          const freshData = snap.val();
+          setData(freshData);
+          localStorage.setItem(CACHE_KEY, JSON.stringify(freshData));
+        } else {
+          console.warn("⚠️ No data found at specified path");
+        }
+      })
+      .catch((err) => console.error("❌ Firebase fetch error:", err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading && !data)
+    return <div className="hero container text-center py-5 text-muted">Loading...</div>;
+  if (!data)
+    return <div className="hero container text-center py-5 text-muted">No data found.</div>;
+
   return (
     <HelmetProvider>
       <Container className="About-header">
         <Helmet>
-          <meta charSet="utf-8" />
-          <title>About | {meta.title}</title>
-          <meta name="description" content={meta.description} />
+          <title>About | {data.name}</title>
         </Helmet>
 
+        {/* Header */}
         <Row className="mb-5 mt-3 pt-md-3">
           <Col lg="8">
-            <h1 className="display-4 mb-4">About me</h1>
+            <h1 className="display-4 mb-4">About Me</h1>
             <hr className="t_border my-4 ml-0 text-left" />
           </Col>
         </Row>
 
-        {/* Intro */}
-        <Row className="sec_sp about-intro">
-          <Col lg="5">
-            <h3 className="color_sec py-4">{dataabout.title}</h3>
-          </Col>
-          <Col lg="7" className="d-flex align-items-center">
-            <p className="about-text">{dataabout.aboutme}</p>
-          </Col>
-        </Row>
-
-        {/* Work Timeline */}
+        {/* Summary */}
         <Row className="sec_sp">
           <Col lg="5">
-            <h3 className="color_sec py-4">Work Timeline</h3>
+            <h3 className="color_sec py-4">{data.title}</h3>
           </Col>
-          <Col lg="7">
-            <ul className="timeline">
-              {worktimeline.map((item, i) => (
-                <li className="timeline-item" key={i}>
-                  <div className="timeline-dot" aria-hidden />
-                  <div className="timeline-card">
-                    <div className="timeline-top">
-                      <h5 className="timeline-role">{item.jobtitle}</h5>
-                      <span className="timeline-date">{item.date}</span>
-                    </div>
-                    <div className="timeline-where">{item.where}</div>
-                  </div>
-                </li>
-              ))}
-            </ul>
+          <Col lg="7" className="d-flex align-items-center">
+            <p
+              className="about-text"
+              dangerouslySetInnerHTML={{
+                __html: data.summary.replace(/\r?\n/g, "<br/>"),
+              }}
+            ></p>
           </Col>
         </Row>
 
@@ -60,36 +77,124 @@ export const About = () => {
             <h3 className="color_sec py-4">Skills</h3>
           </Col>
           <Col lg="7">
-            <div className="skills-wrap">
-              {skills.map((s, i) => (
-                <div className="skill-row" key={i}>
-                  <div className="skill-head">
-                    <h4 className="skill-name">{s.name}</h4>
-                    <span className="skill-val">{s.value}%</span>
-                  </div>
-                  <div className="progress">
-                    <div className="progress-bar" style={{ width: `${s.value}%` }} />
-                  </div>
-                </div>
-              ))}
-            </div>
+            {data.skills?.map((skill, i) => (
+              <p
+                key={i}
+                className="about-text"
+                dangerouslySetInnerHTML={{ __html: skill }}
+              ></p>
+            ))}
           </Col>
         </Row>
 
-        {/* Services */}
+        {/* Experience */}
         <Row className="sec_sp">
           <Col lg="5">
-            <h3 className="color_sec py-4">Services</h3>
+            <h3 className="color_sec py-4">Experience</h3>
           </Col>
           <Col lg="7">
-            <div className="services-grid">
-              {services.map((srv, i) => (
-                <article className="service-card" key={i}>
-                  <h5 className="service__title">{srv.title}</h5>
-                  <p className="service_desc">{srv.description}</p>
-                </article>
+            <ul className="timeline">
+              {data.experience?.map((exp, i) => (
+                <li className="timeline-item" key={i}>
+                  <div className="timeline-dot" />
+                  <div className="timeline-card">
+                    <div className="timeline-top">
+                      <h5 className="timeline-role">{exp.role}</h5>
+                      <span className="timeline-date">
+                        {exp.from} – {exp.to}
+                      </span>
+                    </div>
+                    <div className="timeline-where">
+                      {exp.company} | {exp.location}
+                    </div>
+                    <p
+                      className="timeline-summary"
+                      dangerouslySetInnerHTML={{
+                        __html: exp.summary.replace(/;/g, "<br/>"),
+                      }}
+                    ></p>
+                  </div>
+                </li>
               ))}
-            </div>
+            </ul>
+          </Col>
+        </Row>
+
+        {/* Education */}
+        <Row className="sec_sp">
+          <Col lg="5">
+            <h3 className="color_sec py-4">Education</h3>
+          </Col>
+          <Col lg="7">
+            <ul className="timeline">
+              {data.education?.map((edu, i) => (
+                <li className="timeline-item" key={i}>
+                  <div className="timeline-dot" />
+                  <div className="timeline-card">
+                    <div className="timeline-top">
+                      <h5 className="timeline-role">{edu.stream}</h5>
+                      <span className="timeline-date">
+                        {edu.from} – {edu.to}
+                      </span>
+                    </div>
+                    <div className="timeline-where">{edu.institute}</div>
+                    <p className="timeline-summary">
+                      Grade / CGPA: <strong>{edu.percentage}</strong>
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </Col>
+        </Row>
+
+        {/* Certifications */}
+        <Row className="sec_sp">
+          <Col lg="5">
+            <h3 className="color_sec py-4">Certifications</h3>
+          </Col>
+          <Col lg="7">
+            <ul className="cert-list">
+              {data.certifications?.map((cert, i) => (
+                <li key={i} className="cert-item" style={{ marginBottom: "10px" }}>
+                  <span>• {cert.name}</span>
+                  {cert.link && (
+                    <a
+                      href={cert.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="view-btn"
+                      style={{
+                        marginLeft: "10px",
+                        padding: "2px 10px",
+                        borderRadius: "8px",
+                        backgroundColor: "var(--secondary-color)",
+                        color: "#fff",
+                        textDecoration: "none",
+                        fontSize: "0.9rem",
+                      }}
+                    >
+                      View
+                    </a>
+                  ) }
+                </li>
+              ))}
+            </ul>
+          </Col>
+        </Row>
+        {/* Contact Info */}
+        <Row className="sec_sp">
+          <Col lg="5">
+            <h3 className="color_sec py-4">Contact</h3>
+          </Col>
+          <Col lg="7">
+            <p className="about-text">
+              <strong>Address:</strong> {data.address}
+              <br />
+              <strong>Email:</strong> {data.email}
+              <br />
+              <strong>Phone:</strong> {data.phone}
+            </p>
           </Col>
         </Row>
       </Container>
