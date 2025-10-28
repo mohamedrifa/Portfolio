@@ -8,7 +8,6 @@ import {
   browserSessionPersistence,
 } from "firebase/auth";
 import { getDatabase } from "firebase/database";
-// import { getAnalytics, isSupported } from "firebase/analytics"; // optional
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,

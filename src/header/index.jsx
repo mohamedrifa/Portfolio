@@ -2,26 +2,48 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import Themetoggle from "../components/themetoggle";
-import { logotext } from "../content_option";
+import { db } from "../config/firebase";
+import { ref, get, child } from "firebase/database";
 
-export default function HeadermainGlass() {
+const CACHE_KEY = "rifayath_data";
+
+export default function Headermain() {
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const [name, setName] = useState("")
 
-  // --- theme awareness (no changes to Themetoggle required) ---
   const readTheme = () =>
     document.documentElement.getAttribute("data-theme") || "light";
   const [theme, setTheme] = useState(readTheme);
 
   useEffect(() => {
-    // react to <html data-theme="..."> changes
     const el = document.documentElement;
     const observer = new MutationObserver(() => setTheme(readTheme()));
     observer.observe(el, { attributes: true, attributeFilter: ["data-theme"] });
-    // also sync on mount (in case toggle ran before this component)
     setTheme(readTheme());
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        try {
+          const data = JSON.parse(cached)
+          setName(data.name);
+        } catch {
+          console.warn("Invalid cached data, ignoring...");
+        }
+      }
+      get(child(ref(db), "users/fNbNlQ9o3sef4cst0CTVsaqOiym2/name"))
+        .then((snap) => {
+          if (snap.exists()) {
+            setName(snap.val());
+          } else {
+            console.warn("⚠️ No data found at", USER_PATH);
+          }
+        })
+        .catch((err) => console.error("❌ Firebase fetch error:", err))
+    }, []);
 
   // tokens for light / dark
   const glass =
@@ -190,7 +212,7 @@ export default function HeadermainGlass() {
     <div style={wrapper}>
       <div style={pill}>
         <div style={inner}>
-          <Link to="/" style={brand}>{logotext}</Link>
+          <Link to="/" style={brand}>{name}</Link>
 
           <div style={{ flex: 1 }} />
 
