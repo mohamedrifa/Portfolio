@@ -9,7 +9,7 @@ import { lightImage, darkImage } from "../../utils/homeImage";
 
 const CACHE_KEY = "rifayath_data";
 
-export const Home = () => {
+export default function Home () {
   const prefersReduced = useMemo(
     () =>
       typeof window !== "undefined" &&

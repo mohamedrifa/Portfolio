@@ -1,42 +1,33 @@
-import React from "react";
-import { Route, Routes} from "react-router-dom";
-import withRouter from "../hooks/withRouter"
-import { Home } from "../pages/home";
-import { Projects } from "../pages/projects";
-import { ContactMe } from "../pages/contact";
-import { About } from "../pages/about";
+// src/routes/index.jsx
+import React, { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Socialicons } from "../components/socialicons";
-import { CSSTransition, TransitionGroup } from "react-transition-group";
+import Home from "../pages/home";
+import Projects from "../pages/projects";
+import About from "../pages/about";
+import ContactMe from "../pages/contact";
 
-const AnimatedRoutes = withRouter(({ location }) => (
-  <TransitionGroup>
-    <CSSTransition
-      key={location.key}
-      timeout={{
-        enter: 400,
-        exit: 400,
-      }}
-      classNames="page"
-      unmountOnExit
-    >
-      <Routes location={location}>
-        <Route exact path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/projects" element={<Projects />} />
-        <Route path="/contact" element={<ContactMe />} />
-        <Route path="*" element={<Home />} />
-      </Routes>
-    </CSSTransition>
-  </TransitionGroup>
-));
+export default function AppRoutes() {
+  const { hash } = useLocation();
 
-function AppRoutes() {
+  useEffect(() => {
+    if (hash) {
+      const section = document.getElementById(hash.substring(1));
+      if (section) {
+        setTimeout(() => {
+          section.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }
+    }
+  }, [hash]);
+
   return (
     <div className="s_c">
-      <AnimatedRoutes />
+      <section id="home"><Home /></section>
+      <section id="projects"><Projects /></section>
+      <section id="about"><About /></section>
+      <section id="contact"><ContactMe /></section>
       <Socialicons />
     </div>
   );
 }
-
-export default AppRoutes;

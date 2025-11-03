@@ -7,7 +7,7 @@ import { ref, get, child } from "firebase/database";
 
 const CACHE_KEY = "rifayath_data";
 
-export const ContactMe = () => {
+export default function ContactMe () {
   const [formData, setFormdata] = useState({
     email: "",
     name: "",

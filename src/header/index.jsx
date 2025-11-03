@@ -1,6 +1,6 @@
 // HeadermainGlass.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import Themetoggle from "../components/themetoggle";
 import { db } from "../config/firebase";
 import { ref, get, child } from "firebase/database";
@@ -10,8 +10,19 @@ const CACHE_KEY = "rifayath_data";
 export default function Headermain() {
   const location = useLocation();
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState("")
+  const [name, setName] = useState("");
 
+  // ✅ Scroll + Set hash
+  const scrollNavigate = (id) => {
+    window.location.hash = id;
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+    setOpen(false);
+  };
+
+  // Theme
   const readTheme = () =>
     document.documentElement.getAttribute("data-theme") || "light";
   const [theme, setTheme] = useState(readTheme);
@@ -24,28 +35,22 @@ export default function Headermain() {
     return () => observer.disconnect();
   }, []);
 
+  // Firebase
   useEffect(() => {
-      const cached = localStorage.getItem(CACHE_KEY);
-      if (cached) {
-        try {
-          const data = JSON.parse(cached)
-          setName(data.name);
-        } catch {
-          console.warn("Invalid cached data, ignoring...");
-        }
-      }
-      get(child(ref(db), "users/fNbNlQ9o3sef4cst0CTVsaqOiym2/name"))
-        .then((snap) => {
-          if (snap.exists()) {
-            setName(snap.val());
-          } else {
-            console.warn("⚠️ No data found at", USER_PATH);
-          }
-        })
-        .catch((err) => console.error("❌ Firebase fetch error:", err))
-    }, []);
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      try {
+        const data = JSON.parse(cached);
+        setName(data.name);
+      } catch {}
+    }
 
-  // tokens for light / dark
+    get(child(ref(db), "users/fNbNlQ9o3sef4cst0CTVsaqOiym2/name"))
+      .then((snap) => snap.exists() && setName(snap.val()))
+      .catch(console.error);
+  }, []);
+
+  // Colors
   const glass =
     theme === "dark"
       ? {
@@ -67,7 +72,7 @@ export default function Headermain() {
           active: "rgba(0,0,0,0.08)",
         };
 
-  // --- mobile handling (unchanged) ---
+  // Mobile
   const initialMobile = useMemo(() => {
     if (typeof window === "undefined") return false;
     return window.innerWidth <= 900;
@@ -79,24 +84,26 @@ export default function Headermain() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  // Close drawer on hash change
   useEffect(() => {
     setOpen(false);
     document.body.style.overflow = "";
-  }, [location.pathname]);
+  }, [location.hash]);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
   }, [open]);
 
-  // --- styles (now themed via `glass`) ---
+  // Styles
   const wrapper = {
     position: "fixed",
-    top: 0, left: 0, right: 0,
+    top: 0,
+    left: 0,
+    right: 0,
     zIndex: 1200,
     display: "flex",
     justifyContent: "center",
     padding: "15px 10px",
-    boxSizing: "border-box",
   };
 
   const pill = {
@@ -109,7 +116,6 @@ export default function Headermain() {
     boxShadow: glass.shadow,
     backdropFilter: "blur(10px) saturate(1.1)",
     WebkitBackdropFilter: "blur(10px) saturate(1.1)",
-    boxSizing: "border-box",
   };
 
   const inner = { display: "flex", alignItems: "center", gap: 12 };
@@ -117,17 +123,14 @@ export default function Headermain() {
   const brand = {
     fontWeight: 800,
     color: glass.brand,
-    letterSpacing: 0.3,
     fontSize: 18,
-    userSelect: "none",
-    textDecoration: "none",
     marginLeft: 6,
+    cursor: "pointer",
   };
 
   const linksDesktop = {
     marginLeft: "auto",
     display: isMobile ? "none" : "flex",
-    alignItems: "center",
     gap: 10,
   };
 
@@ -137,116 +140,94 @@ export default function Headermain() {
     fontWeight: 700,
     padding: "10px 12px",
     borderRadius: 12,
-    transition: "transform 180ms ease, background-color 180ms ease",
-    display: "inline-block",
+    transition: "180ms",
   };
 
-  const isActive = (path) => location.pathname === path;
-
+  const currentHash = location.hash || "#home";
   const [hovered, setHovered] = useState(null);
-  const hoverBg = (i) =>
-    hovered === i ? { background: glass.hover, transform: "translateY(-2px)" } : null;
 
-  const NavLink = ({ to, children, index }) => (
-    <Link
-      to={to}
+  const NavButton = ({ id, label, index }) => (
+    <div
+      onClick={() => scrollNavigate(id)}
       style={{
         ...linkBase,
-        ...(hoverBg(index) || {}),
-        ...(isActive(to)
-          ? { background: glass.active, transform: "translateY(-2px)" }
-          : {}),
+        cursor: "pointer",
+        background:
+          currentHash === `#${id}`
+            ? glass.active
+            : hovered === index
+            ? glass.hover
+            : "transparent",
+        transform:
+          currentHash === `#${id}` || hovered === index
+            ? "translateY(-2px)"
+            : "none",
       }}
       onMouseEnter={() => setHovered(index)}
       onMouseLeave={() => setHovered(null)}
     >
-      {children}
-    </Link>
+      {label}
+    </div>
   );
 
-  // Hamburger
-  const hambtn = {
-    display: isMobile ? "inline-flex" : "none",
-    marginLeft: "auto",
-    background: "transparent",
-    border: "none",
-    cursor: "pointer",
-    padding: 8,
-    borderRadius: 10,
-  };
-
-  const hamburgerBox = { width: 26, height: 18, position: "relative" };
-  const lineCommon = {
-    position: "absolute", left: 0, right: 0, height: 2,
-    background: glass.text, borderRadius: 2,
-    transition: "transform 260ms cubic-bezier(.2,.9,.2,1), opacity 200ms, top 260ms",
-  };
-  const line1 = { ...lineCommon, top: open ? 8 : 0, transform: open ? "rotate(45deg)" : "none" };
-  const line2 = { ...lineCommon, top: 8, opacity: open ? 0 : 1 };
-  const line3 = { ...lineCommon, top: open ? 8 : 16, transform: open ? "rotate(-45deg)" : "none" };
-
-  // Mobile panel
+  // Mobile Panel
   const mobilePanel = {
     position: "absolute",
     top: "calc(100% + 10px)",
     right: 0,
-    margin: "0 10px",
     padding: 10,
     borderRadius: 12,
     background: glass.bg,
     border: `1px solid ${glass.stroke}`,
-    backdropFilter: "blur(10px) saturate(1.1)",
-    WebkitBackdropFilter: "blur(10px) saturate(1.1)",
-    boxShadow: glass.shadow,
-    transformOrigin: "top right",
-    transition: "transform 260ms cubic-bezier(.2,.9,.2,1), opacity 220ms ease",
+    backdropFilter: "blur(10px)",
     opacity: open ? 1 : 0,
-    transform: open ? "translateY(0) scale(1)" : "translateY(-8px) scale(0.98)",
+    transform: open ? "scale(1)" : "scale(0.95)",
     pointerEvents: open ? "auto" : "none",
     display: isMobile ? "block" : "none",
     zIndex: 1250,
-    maxWidth: "calc(100% - 20px)",
   };
 
   return (
     <div style={wrapper}>
       <div style={pill}>
         <div style={inner}>
-          <Link to="/" style={brand}>{name}</Link>
+          {/* Brand */}
+          <span style={brand} onClick={() => scrollNavigate("home")}>
+            {name}
+          </span>
 
-          <div style={{ flex: 1 }} />
-
-          {/* Desktop links */}
-          <nav aria-label="Primary" style={linksDesktop}>
-            <NavLink to="/" index={0}>Home</NavLink>
-            <NavLink to="/projects" index={1}>Projects</NavLink>
-            <NavLink to="/about" index={2}>About</NavLink>
-            <NavLink to="/contact" index={3}>Contact</NavLink>
+          {/* Desktop Nav */}
+          <nav style={linksDesktop}>
+            <NavButton id="home" label="Home" index={0} />
+            <NavButton id="projects" label="Projects" index={1} />
+            <NavButton id="about" label="About" index={2} />
+            <NavButton id="contact" label="Contact" index={3} />
           </nav>
 
-          {/* Right actions */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginLeft: 8 }}>
+          <div style={{ marginLeft: 8, display: "flex", gap: 10 }}>
             <Themetoggle />
+
+            {/* Hamburger */}
             <button
-              aria-label={open ? "Close menu" : "Open menu"}
-              aria-expanded={open}
               onClick={() => setOpen((s) => !s)}
-              style={hambtn}
+              style={{
+                display: isMobile ? "inline-flex" : "none",
+                background: "transparent",
+                border: "none",
+                padding: 8,
+                cursor: "pointer",
+              }}
             >
-              <div style={hamburgerBox}>
-                <span style={line1} />
-                <span style={line2} />
-                <span style={line3} />
-              </div>
+              ☰
             </button>
           </div>
 
-          {/* Mobile panel */}
-          <div style={mobilePanel} role="menu" aria-hidden={!open}>
-            <Link to="/" style={linkBase}>Home</Link>
-            <Link to="/projects" style={linkBase}>Projects</Link>
-            <Link to="/about" style={linkBase}>About</Link>
-            <Link to="/contact" style={linkBase}>Contact</Link>
+          {/* Mobile Links */}
+          <div style={mobilePanel}>
+            <NavButton id="home" label="Home" />
+            <NavButton id="projects" label="Projects" />
+            <NavButton id="about" label="About" />
+            <NavButton id="contact" label="Contact" />
           </div>
         </div>
       </div>

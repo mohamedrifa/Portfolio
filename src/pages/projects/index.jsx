@@ -7,7 +7,7 @@ import { ref, get, child } from "firebase/database";
 
 const CACHE_KEY = "rifayath_data";
 
-export const Projects = () => {
+export default function Projects () {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [expandedCards, setExpandedCards] = useState({});
