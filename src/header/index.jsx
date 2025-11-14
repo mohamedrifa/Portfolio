@@ -11,7 +11,6 @@ export default function Headermain() {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
 
-  // Scroll navigation
   const scrollNavigate = (id) => {
     window.location.hash = id;
     const el = document.getElementById(id);
@@ -19,7 +18,6 @@ export default function Headermain() {
     setOpen(false);
   };
 
-  // Theme detection
   const readTheme = () =>
     document.documentElement.getAttribute("data-theme") || "light";
   const [theme, setTheme] = useState(readTheme);
@@ -35,7 +33,6 @@ export default function Headermain() {
     return () => observer.disconnect();
   }, []);
 
-  // Firebase name fetch
   useEffect(() => {
     const cached = localStorage.getItem(CACHE_KEY);
     if (cached) {
@@ -43,7 +40,6 @@ export default function Headermain() {
         setName(JSON.parse(cached).name);
       } catch {}
     }
-
     get(child(ref(db), "users/fNbNlQ9o3sef4cst0CTVsaqOiym2/name"))
       .then((snap) => snap.exists() && setName(snap.val()))
       .catch(console.error);
@@ -57,19 +53,34 @@ export default function Headermain() {
 
   const currentHash = location.hash || "#home";
 
-  const LinkBtn = ({ id, label }) => (
-    <div
-      onClick={() => scrollNavigate(id)}
-      className={`
-        px-4 py-2 rounded-lg font-semibold transition-all
-        ${currentHash === `#${id}`
-          ? "bg-black bg-opacity-10 dark:bg-white/10 -translate-y-0.5"
-          : "hover:bg-black hover:bg-opacity-5 dark:hover:bg-white/10"}
-      `}
-    >
-      {label}
-    </div>
-  );
+  const LinkBtn = ({ id, label }) => {
+    const isActive = currentHash === `#${id}`;
+    const LIGHT_ACTIVE = "#00000033";
+    const LIGHT_HOVER  = "#0000000D";
+    const DARK_ACTIVE  = "#FFFFFF1A";
+    const DARK_HOVER   = "#FFFFFF0D";
+    const activeBg = theme === "dark" ? DARK_ACTIVE : LIGHT_ACTIVE;
+    const hoverBg  = theme === "dark" ? DARK_HOVER  : LIGHT_HOVER;
+    return (
+      <div
+        onClick={() => scrollNavigate(id)}
+        className={`px-4 py-2 rounded-lg font-semibold transition-all duration-150 
+          ${isActive ? " -translate-y-0.5 shadow-sm" : ""}
+        `}
+        style={{
+          backgroundColor: isActive ? activeBg : undefined,
+        }}
+        onMouseEnter={(e) => {
+          if (!isActive) e.currentTarget.style.backgroundColor = hoverBg;
+        }}
+        onMouseLeave={(e) => {
+          if (!isActive) e.currentTarget.style.backgroundColor = "";
+        }}
+      >
+        {label}
+      </div>
+    );
+  };
 
   return (
     <div className="fixed top-0 left-0 right-0 z-1200 flex justify-center px-3 py-4">
@@ -83,15 +94,12 @@ export default function Headermain() {
         `}
       >
         <div className="flex items-center gap-3">
-          {/* Brand */}
           <span
             className="font-extrabold text-lg cursor-pointer"
             onClick={() => scrollNavigate("home")}
           >
             {name}
           </span>
-
-          {/* Desktop Links */}
           <nav className="ml-auto hidden md:flex gap-2">
             <LinkBtn id="home" label="Home" />
             <LinkBtn id="projects" label="Projects" />
@@ -99,11 +107,8 @@ export default function Headermain() {
             <LinkBtn id="contact" label="Contact" />
           </nav>
 
-          {/* Right icons */}
           <div className="flex gap-3 ml-auto md:ml-3 justify-center items-center">
             <Themetoggle />
-
-            {/* Mobile Hamburger */}
             <button
               onClick={() => setOpen((v) => !v)}
               className="md:hidden p-2 text-xl"
@@ -111,8 +116,6 @@ export default function Headermain() {
               ☰
             </button>
           </div>
-
-          {/* Mobile Drawer */}
           {isMobile && (
             <div
               className={`
