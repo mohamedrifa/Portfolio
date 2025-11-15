@@ -5,7 +5,7 @@ import withRouter from "../hooks/withRouter";
 import AppRoutes from "./routes";
 import Headermain from "../header";
 import AnimatedCursor from "../hooks/AnimatedCursor";
-import "./App.css";
+import Colors from "../constants/Colors";
 
 function _ScrollToTop(props) {
   const { pathname } = useLocation();
@@ -17,6 +17,13 @@ function _ScrollToTop(props) {
 const ScrollToTop = withRouter(_ScrollToTop);
 
 export default function App() {
+  const colors = Colors();
+  useEffect(() => {
+    Object.entries(colors).forEach(([key, value]) => {
+      document.documentElement.style.setProperty(key, value);
+    });
+  }, [colors]);
+
   return (
     <Router basename={import.meta.env.VITE_BASE_URL}>
       <div className="cursor__dot">

@@ -13,8 +13,6 @@ import {
   FaWhatsapp
 } from "react-icons/fa";
 
-import Colors from "../../constants/Colors";
-
 const socialprofils = {
   instagram: "https://www.instagram.com/mmohamedrifayath/",
   facebook: "https://www.facebook.com/mohamed.rifayath.39",
@@ -38,13 +36,6 @@ const ICON_MAPPING = {
 };
 
 export const Socialicons = () => {
-  const colors = Colors();
-  useEffect(() => {
-    Object.entries(colors).forEach(([key, value]) => {
-      document.documentElement.style.setProperty(key, value);
-    });
-  }, [colors]);
-
   return (
     <div
       className="
