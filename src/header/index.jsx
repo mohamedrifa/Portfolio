@@ -18,9 +18,18 @@ export default function Headermain() {
     setOpen(false);
   };
 
-  const readTheme = () =>
-    document.documentElement.getAttribute("data-theme") || "light";
-  const [theme, setTheme] = useState(readTheme);
+  const [theme, setTheme] = useState(null);
+
+  useEffect(() => {
+    const readTheme = () => document.documentElement.getAttribute("data-theme") || "dark";
+    setTheme(readTheme());
+    const observer = new MutationObserver(() => setTheme(readTheme()));
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const observer = new MutationObserver(() =>
