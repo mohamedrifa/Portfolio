@@ -7,7 +7,8 @@ import { db } from "../../config/firebase";
 import { ref, get, child } from "firebase/database";
 import { lightImage, darkImage } from "../../utils/homeImage";
 
-const CACHE_KEY = "rifayath_data";
+const CACHE_KEY = import.meta.env.VITE_CACHE_KEY;
+const ADMIN_URL = import.meta.env.VITE_ADMIN_URL;
 
 export default function Home () {
   const prefersReduced = useMemo(
@@ -136,12 +137,16 @@ export default function Home () {
             </p>
 
             <div className="hero__actions">
-              <Link to="/portfolio" className="btn btn--accent" aria-label="View my portfolio">
-                My Portfolio
-              </Link>
-              <Link to="/contact" className="btn btn--ghost btn--alt" style={{color: "var(--h3-text)"}} aria-label="Contact me">
-                Contact Me
-              </Link>
+              <a
+                href={`${ADMIN_URL}/resume/fNbNlQ9o3sef4cst0CTVsaqOiym2`}
+                className="btn btn--ghost btn--alt"
+                style={{ color: "var(--h3-text)" }}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Contact me"
+              >
+                View Resume
+              </a>
             </div>
           </div>
         </div>

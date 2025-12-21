@@ -5,7 +5,7 @@ import { Container } from "react-bootstrap";
 import { db } from "../../config/firebase";
 import { ref, get, child } from "firebase/database";
 
-const CACHE_KEY = "rifayath_data";
+const CACHE_KEY = import.meta.env.VITE_CACHE_KEY;
 
 export default function Projects () {
   const [data, setData] = useState(null);

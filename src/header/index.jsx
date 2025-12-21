@@ -4,7 +4,7 @@ import Themetoggle from "../components/themetoggle";
 import { db } from "../config/firebase";
 import { ref, get, child } from "firebase/database";
 
-const CACHE_KEY = "rifayath_data";
+const CACHE_KEY = import.meta.env.VITE_CACHE_KEY;
 
 export default function Headermain() {
   const location = useLocation();
