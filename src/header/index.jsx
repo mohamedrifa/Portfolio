@@ -115,7 +115,6 @@ export default function Headermain() {
             <LinkBtn id="about" label="About" />
             <LinkBtn id="contact" label="Contact" />
           </nav>
-
           <div className="flex gap-3 ml-auto md:ml-3 justify-center items-center">
             <Themetoggle />
             <button
